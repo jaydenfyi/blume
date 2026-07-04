@@ -6,6 +6,7 @@ import { GITHUB_MARK } from "../github-mark.ts";
 import Icon from "../Icon.astro";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
 import Logo from "./Logo.astro";
+import { isUnderPath } from "./nav-utils.ts";
 import NavSelector from "./NavSelector.astro";
 import { resolveSlot } from "./overrides.ts";
 import Search from "./Search.astro";
@@ -123,12 +124,7 @@ const clickScript = `(()=>{const dr=()=>{const h=document.querySelector("[data-b
       <nav aria-label="Sections" class={tabsNavClass}>
         {navigation.tabs.map((tab) => (
           <a
-            aria-current={
-              route === tab.path ||
-              (tab.path !== "/" && route.startsWith(tab.path))
-                ? "page"
-                : undefined
-            }
+            aria-current={isUnderPath(route, tab.path) ? "page" : undefined}
             class="rounded-full px-3 py-1.5 font-medium text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:text-foreground"
             href={tab.path}
           >

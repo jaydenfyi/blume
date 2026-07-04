@@ -5,6 +5,7 @@
 // <details>/<summary> like the language switcher.
 import type { NavSelector } from "../../core/types.ts";
 import Icon from "../Icon.astro";
+import { isUnderPath } from "./nav-utils.ts";
 
 interface Props {
   selector: NavSelector;
@@ -18,7 +19,7 @@ const { selector, route } = Astro.props;
 const active =
   selector.items.find((item) => item.path === route) ??
   selector.items
-    .filter((item) => route.startsWith(item.path))
+    .filter((item) => isUnderPath(route, item.path))
     .toSorted((a, b) => b.path.length - a.path.length)[0] ??
   selector.items[0];
 

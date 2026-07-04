@@ -72,7 +72,7 @@ export const findBreadcrumbs = (nodes: NavNode[], route: string): Crumb[] => {
 };
 
 /** Whether `route` is the section root `base` or nested beneath it. */
-const isUnderPath = (route: string, base: string): boolean =>
+export const isUnderPath = (route: string, base: string): boolean =>
   route === base || route.startsWith(`${base}/`);
 
 /**

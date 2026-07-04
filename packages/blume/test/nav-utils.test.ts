@@ -1,6 +1,9 @@
 import { describe, expect, it } from "bun:test";
 
-import { sidebarForRoute } from "../src/components/layout/nav-utils.ts";
+import {
+  isUnderPath,
+  sidebarForRoute,
+} from "../src/components/layout/nav-utils.ts";
 import type { NavNode, NavTab } from "../src/core/types.ts";
 
 const page = (label: string, route: string): NavNode => ({
@@ -32,6 +35,22 @@ const TABS: NavTab[] = [
 ];
 
 const labels = (nodes: NavNode[]): string[] => nodes.map((node) => node.label);
+
+describe("isUnderPath", () => {
+  it("matches the base route and nested routes only at segment boundaries", () => {
+    expect(isUnderPath("/api", "/api")).toBe(true);
+    expect(isUnderPath("/api/files", "/api")).toBe(true);
+    // `/api-reference` shares a string prefix with `/api` but is a sibling
+    // section, not a child — the header must not highlight both tabs.
+    expect(isUnderPath("/api-reference", "/api")).toBe(false);
+    expect(isUnderPath("/api-reference/auth", "/api")).toBe(false);
+  });
+
+  it("treats the root path as matching only the root route", () => {
+    expect(isUnderPath("/", "/")).toBe(true);
+    expect(isUnderPath("/api", "/")).toBe(false);
+  });
+});
 
 describe("sidebarForRoute", () => {
   it("scopes to the active tab's section group", () => {
