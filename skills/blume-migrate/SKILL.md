@@ -27,8 +27,8 @@ Your job is to convert a source docs repo into an **idiomatic** Blume project �
    - Anything else → apply this file's mental model directly; there's no framework-specific reference, so inventory by hand.
 2. **Inventory the repo** before changing anything: the config file(s), the content tree, the nav definition, snippets/partials/includes, static assets, OpenAPI/AsyncAPI specs, redirects, i18n locales, custom components, and icon usage. Note what's declared vs. defaulted.
 3. **Write `blume.config.ts`** with `defineConfig` from `blume`. Map only declared fields (see the reference's mapping table); rely on defaults everywhere else. A minimal result is `defineConfig({ title: "…" })`.
-4. **Restructure content.** Choose `content.root` (default `docs`). Order with numeric prefixes (`01-intro.mdx`), group without a URL segment via `(group)/` folders, and add a `meta.ts` (`defineMeta`) only where filesystem order isn't enough. Reach for an explicit `navigation.sidebar` only when the source nav genuinely can't be expressed by files.
-5. **Rewrite pages.** Map frontmatter to Blume's strict schema; convert callout JSX to `:::` directives; rename components; inline snippets/partials (Blume has no import-based includes); fix asset paths; **convert every icon name to Lucide** (Blume is Lucide-only — no FontAwesome/Tabler). Remove any duplicated H1 in the body (`title` renders the H1; bodies start at `##`).
+4. **Restructure content.** Choose `content.root` (default `docs`). Order with numeric prefixes (`01-intro.mdx`), group without a URL segment via `(group)/` folders, and add a `meta.ts` (`defineMeta`) only where filesystem order isn't enough. Reach for an explicit `navigation.sidebar` only when the source nav genuinely can't be expressed by files. **Reshaping into folder-per-tab moves URLs** — track every old→new path as you go; you'll turn them into `redirects` in step 5.
+5. **Rewrite pages.** Map frontmatter to Blume's strict schema; convert callout JSX to `:::` directives; rename components; inline snippets/partials (Blume has no import-based includes); fix asset paths; **rewrite internal links** to their new routes (including OpenAPI operation links — see the OpenAPI section, their slugs differ from most sources); **add a `redirects` entry for every route you moved** in step 4; **convert every icon name to Lucide** (Blume is Lucide-only — no FontAwesome/Tabler). Remove any duplicated H1 in the body (`title` renders the H1; bodies start at `##`).
 6. **Adopt `package.json`.** Repoint `dev`/`build`/`start` → `blume dev`/`blume build`/`blume preview`, remove the old framework's deps, add `blume`. A config-only source (e.g. a bare Mintlify `docs.json`) has no manifest — scaffold one.
 7. **Verify.** Run `blume build` (it validates links, anchors, frontmatter schema, and duplicate routes), fix diagnostics, then `blume dev` for a visual pass. End with a written summary of what was migrated, dropped, and approximated.
 
@@ -40,7 +40,7 @@ The single biggest shift for most sources — especially Mintlify — is that **
 
 - **Folders become groups, files become pages.** A page's sidebar label is its frontmatter `title`; a group's label is the humanized folder name.
 - **Ordering resolves highest-priority-first:** an explicit `navigation.sidebar` (replaces the whole tree) → a folder's `meta.ts` `pages` array → a page's frontmatter `sidebar.order` → the filesystem (`index` first, then numeric filename prefix like `01-`, then alphabetical).
-- **`meta.ts` refines one folder** (`defineMeta({ title, icon, order, display, collapsed, pages })`). `display` is `"flat"` (default), `"group"` (collapsible), or `"page"` (drill-in sub-panel).
+- **`meta.ts` refines one folder** (`defineMeta({ title, icon, order, display, collapsed, pages })`). `display` is `"flat"` (default), `"group"` (collapsible), or `"page"` (drill-in sub-panel). The `pages` array lists children by slug (numeric prefix and parentheses stripped); **children you omit sort _after_ the listed ones** — so list `"index"` first when you set `pages`, or the folder's landing page (the tab's target) sinks to the bottom.
 - **An explicit `navigation.sidebar` replaces filesystem generation entirely.** Use it only for a nav shape files can't express. Its items are a page route string, a group (`{ label, items }`), or a link (`{ label, href }`).
 
 ### Tabs and selectors
@@ -56,12 +56,12 @@ The single biggest shift for most sources — especially Mintlify — is that **
 
 `defineConfig({...})` — every field optional, all with defaults:
 
-- **Site:** `title`, `description`, `logo` (string SVG or `{ light, dark, alt, href }`), `banner` (`{ content, link, dismissible, id }` — no color/type).
+- **Site:** `title`, `description`, `logo` (string SVG, or `{ image: string | { light, dark, alt }, text, href }`), `banner` (`{ content, link, dismissible, id }` — no color/type). A logo renders beside `title` in the header, so a **wordmark logo doubles the brand** ("Acme Acme") — set `text: ""` to render the mark alone.
 - **`theme`:** `accent`/`accentDark`/`action` (colors), `mode` (`light`/`dark`/`system`), `strict`, `radius`, `fonts` (`{ body, display }` — curated Google-font slugs), `background`/`backgroundDark`/`backgroundImage`/`backgroundImageDark`, `css`.
 - **`content`:** `root` (default `"docs"`), `include`, `exclude`, `sources` (staged sources: openapi, github-releases, notion, sanity, mdx-remote…), `pages` (custom `.astro` dir), `defaultType`.
 - **`navigation`:** `tabs`, `selectors`, `sidebar`, `repo`.
 - **`search`** (Orama default, Pagefind opt-in), **`ai`** (llms.txt, Ask AI), **`mcp`**, **`openapi`**, **`redirects`**, **`seo`**, **`markdown`**, **`analytics`**, **`deployment`**, **`i18n`**, **`toc`**, **`lastModified`**, **`github`**.
-- **Favicon is a filename convention, not config.** Drop `icon`/`favicon.{svg,png,ico}` (and `apple-icon.png`) in the project root or `public/` — Blume auto-detects it. There is **no** `favicon` config field.
+- **Favicon is a filename convention, not config.** Drop `icon`/`favicon.{svg,png,ico}` (and `apple-icon.png`) in the project root or `public/` — Blume auto-detects it. There is **no** `favicon` config field. A source favicon given as `{ light, dark }` **collapses to one** — pick a single file and report the loss.
 
 The schema is exported from `blume/schema`; the full field reference is in `node_modules/blume/docs/configuration/`.
 
@@ -109,15 +109,19 @@ Also valid: `date`/`authors` (blog/changelog feeds), `changelog` (changelog meta
 
 ### OpenAPI
 
-`openapi: { enabled: true, sources: [{ spec, label?, route? }] }` generates **one real page per operation** — with routing, sidebar, search, and OG images for free. **Never hand-migrate generated API-reference pages** (per-endpoint stub pages in the source): delete them and point `openapi.sources` at the spec. (`renderer: "scalar"` keeps the Scalar embed instead; AsyncAPI uses the same embed.)
+`openapi: { enabled: true, sources: [{ spec, label?, route? }] }` generates **one real page per operation** — with routing, sidebar, search, and OG images for free, plus a header tab for the source. **Never hand-migrate generated API-reference pages** (per-endpoint stub pages in the source): delete them and point `openapi.sources` at the spec. (`renderer: "scalar"` keeps the Scalar embed instead; AsyncAPI uses the same embed.)
+
+- **Vendor the spec by default.** A remote `spec:` URL makes every build depend on fetching it at build time — a single point of failure in CI, offline, or behind a proxy, and a failed fetch skips the whole reference. Prefer committing the spec into the repo (`openapi/<name>.json`) and pointing `spec` at the local path; if you keep the URL, say so and consider a `prebuild` step that refreshes the local copy with a fallback.
+- **Operation routes have their own slug scheme** — `<route>/<slugified-tag>/<slugified-operationId>` (e.g. tag `Models`, id `listModels` → `/api-reference/models/listmodels`). This rarely matches the source's endpoint links (Mintlify/others kebab-case differently), so **rewrite every inbound link to an operation** and verify it against the built routes — `blume build`'s link check does **not** catch dead links to OpenAPI-generated pages.
+- **Keep hand-written conceptual pages.** Sources often pair a written "Introduction/Authentication" page with the endpoint group in the same tab. A normal content page placed under the openapi `route` merges into the reference tab's sidebar — so keep those (auth, errors, rate limits) and delete only the per-endpoint stubs.
 
 ### Redirects are static
 
-`redirects: [{ from, to, status? }]` — map old URLs when you restructure routes. Dynamic/wildcard patterns (`:slug*`) can't be modeled as static path-to-path; move those to host-level config (`_redirects`, `vercel.json`) and report them.
+`redirects: [{ from, to, status? }]` — map old URLs when you restructure routes. **Restructuring is the main source of these:** every page you moved in step 4 (folder-per-tab, renamed slugs, index promotion) needs an entry, or old URLs 404. `status` defaults to **301 (permanent — browsers cache it indefinitely)**; that's correct for genuine moves, but never use 301/308 for redirects you might reverse. Dynamic/wildcard patterns (`:slug*`) can't be modeled as static path-to-path; move those to host-level config (`_redirects`, `vercel.json`) and report them.
 
 ## Verification & reporting
 
-1. Run `blume build`. It validates internal links, heading anchors, the frontmatter schema, and duplicate routes. Iterate until clean.
+1. Run `blume build`. It validates internal links, heading anchors, the frontmatter schema, and duplicate routes. Iterate until clean. **Caveat:** the link check doesn't resolve OpenAPI-generated routes, so a dead link to an operation page builds clean — verify those by hand against the built routes (or in `blume dev`).
 2. Run `blume dev` and review the site visually — nav structure, tabs, theme, rendered components.
 3. **Write a migration summary** covering: what was migrated (config, N pages, nav, OpenAPI), what was **dropped** (navbar CTAs, footers, custom theming, dynamic redirects, unmappable icons, unsupported components), and suggested follow-ups (`blume eject` for full control, `blume add` to vendor a component for customization).
 

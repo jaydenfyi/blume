@@ -18,8 +18,8 @@ Resolve `$ref` includes first (Mintlify splits config across files). Map only wh
 | --- | --- | --- |
 | `name` / `title` | `title` |  |
 | `description` | `description` |  |
-| `logo` (string or `{ light, dark, href }`) | `logo` | pass through; ensure files land in `public/` |
-| `favicon` | **drop the field** — copy the file into `public/` under the conventional name (`favicon.svg`/`icon.png`) | Blume auto-detects by filename; there is **no** favicon config field |
+| `logo` (string or `{ light, dark, href }`) | `logo` (`{ image: { light, dark, alt }, text, href }`) | Mintlify's `light`/`dark` nest under Blume's `image`; ensure files land in `public/`. If the logo is a **wordmark** (brand name baked in), set `text: ""` so it doesn't render twice beside `title` |
+| `favicon` (string **or `{ light, dark }`**) | **drop the field** — copy **one** file into `public/` under the conventional name (`favicon.svg`/`icon.png`) | Blume auto-detects by filename; there is **no** favicon config field, and **no** light/dark favicon — a `{ light, dark }` source collapses to one; report the loss |
 | `colors.primary` | `theme.accent` |  |
 | `colors.light` | `theme.accentDark` |  |
 | `colors.dark` | `theme.action` |  |
@@ -36,6 +36,9 @@ Resolve `$ref` includes first (Mintlify splits config across files). Map only wh
 | `seo.metatags` | **drop** | no equivalent; use per-page `seo` frontmatter |
 | `seo.indexing: "all"` | `search.indexing.includeHiddenPages: true` |  |
 | `variables` (`{{name}}`) | **inline into content** | Blume has no runtime `{{var}}` substitution — replace each `{{name}}` with its value in the pages |
+| `integrations.posthog` (`{ apiKey, apiHost }`) | `analytics.posthog` (`{ key, host }`) | preserve the host verbatim (e.g. `us.posthog.com` — Blume's default is `us.i.posthog.com`) |
+| `integrations` (GA, Plausible, Fathom, …) | `analytics.scripts` / `analytics.vercel` | one `scripts[]` entry per provider (`{ src, strategy, attributes }`); no first-class mapping beyond PostHog/Vercel |
+| `contextual` (`["copy","chatgpt","claude",…]`) | **mostly free** | Copy-as-Markdown and Open-in-chat are default page actions; `mcp` needs `mcp.enabled` + server output (report as a follow-up) |
 | `redirects` | `redirects: [{ from, to }]` | static only — see below |
 | `navigation.languages` | `i18n` | see i18n below |
 
@@ -73,10 +76,12 @@ Mintlify's `navigation` object (`tabs`/`anchors`/`dropdowns`/`products`/`version
 
 - **`groups`** (`{ group, pages: [...] }`) → a folder per group. The `group` name → the folder's humanized name or a `meta.ts` `title`. Nested groups → nested folders. `expanded: false` → `meta.ts` `collapsed: true` (inverted). `tag` → the folder/page `sidebar.badge`.
 - **`pages`** entries are page refs (paths without extension) → files at the corresponding path. An entry that's `"GET /path"` is an OpenAPI endpoint stub → **delete it** (Blume generates these; see OpenAPI).
-- **`tabs`** → `navigation.tabs` (`{ label, path, icon? }`). Put each tab's pages in **one folder** and point the tab's `path` at it — the tab then scopes the sidebar automatically.
+- **`tabs`** → `navigation.tabs` (`{ label, path, icon? }`). Put each tab's pages in **one folder** and point the tab's `path` at it — the tab then scopes the sidebar automatically. Mintlify tabs freely mix pages from any folder; Blume tabs scope by folder, so pages shared across tabs must be **assigned to one tab's folder** (and linked from the others).
 - **`dropdowns`/`products`/`versions`** → `navigation.selectors` (`{ kind, label, items: [{ label, path, icon?, description?, tag? }] }`). Use `kind` `dropdown`/`product`/`version` accordingly.
 - **`languages`** → `i18n`, not a selector (see below).
 - Only fall back to an explicit `navigation.sidebar` for a shape the filesystem genuinely can't express.
+
+This reshaping **changes URLs** — a page moved from `getting-started/quickstart` into the API tab's folder becomes `/api/…`, an `index` promotion drops a segment, etc. Record each old→new path and add a `redirects` entry for it (see below); otherwise every existing link and bookmark 404s.
 
 ## Content & component transforms
 
@@ -110,7 +115,11 @@ Remove any duplicate H1 in the body — `title` renders the H1.
 
 ## OpenAPI
 
-Top-level `openapi`, `api.openapi`, or a per-group/per-tab `openapi` → `openapi: { enabled: true, sources: [{ spec, label?, route? }] }`. A Mintlify `{ source, directory }` object: `directory` → the source's `route`. **Delete every per-endpoint stub page** (frontmatter `openapi: "GET /path"` or a `"GET /path"` nav entry) — Blume's native renderer generates one real page per operation.
+Top-level `openapi`, `api.openapi`, or a per-group/per-tab `openapi` → `openapi: { enabled: true, sources: [{ spec, label?, route? }] }`. A Mintlify `{ source, directory }` object: `directory` → the source's `route`. **Delete every per-endpoint stub page** (frontmatter `openapi: "GET /path"` or a `"GET /path"` nav entry) — Blume's native renderer generates one real page per operation, plus a header tab for the source.
+
+- **Vendor the spec.** Mintlify usually points at a spec **URL**. Copying that straight into `spec:` makes every build fetch it at build time — a single point of failure in CI/offline/behind a proxy, and a failed fetch silently drops the reference (leaving the tab pointing at a route that 404s). Prefer downloading it into the repo (`curl … -o openapi/<name>.json`) and pointing `spec` at that local path. If you keep the URL, report the dependency and consider a `prebuild` refresh-with-fallback.
+- **Fix endpoint links.** Blume operation routes are `<route>/<slugified-tag>/<slugified-operationId>` (tag `Models` + id `listModels` → `/api-reference/models/listmodels`) — this differs from Mintlify's endpoint URLs, so **rewrite every inbound link to an operation** and verify it against the built routes. `blume build`'s link check does **not** flag dead links to OpenAPI pages.
+- **Keep the "Introduction" page.** Mintlify commonly has a written intro/auth page in an "Introduction" group beside the "Endpoints" (openapi) group in the same tab. Keep it: a normal content page placed under the openapi `route` (e.g. `<root>/api-reference/introduction.mdx`) merges into the reference tab's sidebar alongside the generated operations. Delete only the per-endpoint stubs, not the conceptual pages.
 
 ## Assets
 
@@ -123,6 +132,7 @@ Mintlify serves every top-level dir (e.g. `/images`) at the site root. Blume ser
 ## Dropped — report these
 
 - **`navbar.links`/`navbar.primary`** (header CTAs) → re-add via `navigation.tabs` or a Header override.
+- **`navigation.global.anchors`** (external header links like Blog/Contact) → no header-links config; drop and report, or restore via a Header override.
 - **`footer.socials`** → suggest the `github` config, or a Footer override.
 - **Per-language banners** (`navigation.languages[].banner`) → no equivalent.
 - **Dynamic redirects** (`:slug*`/`:id` params) → can't be static path-to-path; move to host rules (`_redirects`, `vercel.json`).
