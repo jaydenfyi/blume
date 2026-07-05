@@ -20,7 +20,7 @@ Everything else is `defineConfig({ title })`.
 
 ## Navigation: `meta.json` → `meta.ts`
 
-Move content from `content/docs/` to your chosen `content.root` (e.g. `docs/`), then convert each `meta.json` to a `meta.ts` (`defineMeta`):
+**Every `meta.json` becomes a `meta.ts` — this is the primary navigation carry-over for Fumadocs, always required, never optional.** `meta.json` is Fumadocs' canonical nav source; no filesystem-only shortcut reproduces its ordering, icons, and collapse state, so don't skip it in favor of filename inference. Move content from `content/docs/` to your chosen `content.root` (e.g. `docs/`), then convert each `meta.json` to a `meta.ts` (`defineMeta`):
 
 | Fumadocs `meta.json` | Blume `meta.ts`                                  |
 | -------------------- | ------------------------------------------------ |

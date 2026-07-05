@@ -17,6 +17,8 @@ Nextra's site config lives in `theme.config.*` / `next.config.*`. **Read them by
 
 ## Navigation: `_meta` → `meta.ts` + frontmatter
 
+**Every `_meta` file must be carried over — always convert it to `meta.ts` + frontmatter, never drop it in favor of filename inference.** `_meta` is Nextra's canonical nav source (ordering, labels, folder titles); the filesystem alone can't reproduce it.
+
 For each `_meta` entry (`key` = slug, value = string title or `{ title, type, display, href }`):
 
 | Nextra `_meta` entry | Blume |
