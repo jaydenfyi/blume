@@ -20,7 +20,7 @@ Read `themeConfig`, `presets`, and `plugins`:
 | `themeConfig.navbar.items` (doc/link items) | `navigation.tabs` (for section links) or a Header override (for external CTAs) |
 | `themeConfig.colorMode.defaultMode` | `theme.mode` |
 | `themeConfig.prism.theme` / `.darkTheme` | `markdown.codeBlocks.theme: { light, dark }` (map Prism theme names to Shiki themes, e.g. `github`/`github-dark`) |
-| `url` + `baseUrl` | `deployment.site` (and a route prefix if `baseUrl` isn't `/`) |
+| `url` + `baseUrl` | **`url` → drop** (`deployment.site` auto-detects: localhost in dev, the deploy URL on Vercel — don't hardcode it); `baseUrl` (when not `/`) → `deployment.base` route prefix |
 | preset `docs.routeBasePath` | serve docs under that prefix via `content.sources` `prefix`, or set `content.root` |
 | preset `docs.editUrl` / `themeConfig.editUrl` | `github` (owner/repo/branch) |
 | `themeConfig.footer` | drop → Footer override |
