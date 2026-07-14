@@ -1,0 +1,35 @@
+packages/blume/src/core/schema.ts
+  s_3a2fabc36d89e9::t_02460b07b8e516 651-678
+apps/docs/blume.config.ts
+  s_3a2fabc36d89e9::t_02460b07b8e516 41-45
+apps/docs/content/docs/content/navigation.mdx
+  s_3a2fabc36d89e9::t_02460b07b8e516 112,116-119
+packages/blume/src/core/config-input.ts
+  s_3a2fabc36d89e9::t_02460b07b8e516 369-370,377-378
+.changeset/fresh-rivers-rest.md
+  s_3a2fabc36d89e9::t_02460b07b8e516 5
+packages/blume/test/core.test.ts
+  s_3a2fabc36d89e9::t_df56e0ef2e81fd 963,967,969-974
+  s_3a2fabc36d89e9::t_4d09e43013d842 17,975,977-978,981-982
+  s_3a2fabc36d89e9::t_13b298cdeb3b8f 32-33
+  s_3a2fabc36d89e9::t_429603ad8187e6 34,964-965
+packages/blume/test/generate.test.ts
+  s_3a2fabc36d89e9::t_02460b07b8e516 201-202
+  s_3a2fabc36d89e9::t_df56e0ef2e81fd 196
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "fcc27d86f3640d4ea415b0316ba26d12efb1915a",
+  "prompts": {},
+  "sessions": {
+    "s_3a2fabc36d89e9": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_09e3f59deffeP3S3gF45h545iQ",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "jaydenfyi <213395523+jaydenfyi@users.noreply.github.com>"
+    }
+  }
+}
