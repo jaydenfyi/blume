@@ -1,0 +1,34 @@
+apps/docs/content/docs/content/navigation.mdx
+  s_3a2fabc36d89e9::t_02460b07b8e516 112,116-119
+  s_3a2fabc36d89e9::t_334bac319c9c24 113-115,120-122
+apps/docs/blume.config.ts
+  s_e414628aa31879::t_1e07abad132235 47-52,54
+  s_3a2fabc36d89e9::t_02460b07b8e516 41
+  s_e414628aa31879::t_5c0081de1fc505 4-6,56
+  s_3a2fabc36d89e9::t_f97c23a66f060e 53
+  s_3a2fabc36d89e9::t_a9163ce59230c9 55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "115803b3f5a30c238ef7c7df7f413417d0da486f",
+  "prompts": {},
+  "sessions": {
+    "s_3a2fabc36d89e9": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_09e3f59deffeP3S3gF45h545iQ",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "jaydenfyi <213395523+jaydenfyi@users.noreply.github.com>"
+    },
+    "s_e414628aa31879": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_09e48ccf0ffeMSr21FRCts8A5c",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "jaydenfyi <213395523+jaydenfyi@users.noreply.github.com>"
+    }
+  }
+}
