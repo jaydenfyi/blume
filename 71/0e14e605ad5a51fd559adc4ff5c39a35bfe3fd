@@ -1,0 +1,39 @@
+apps/docs/blume.config.ts
+  s_3a2fabc36d89e9::t_c16958c023777c 41-47
+packages/blume/src/astro/generate.ts
+  s_3a2fabc36d89e9::t_334bac319c9c24 801-802
+  s_3a2fabc36d89e9::t_c16958c023777c 800
+packages/blume/src/core/schema.ts
+  s_3a2fabc36d89e9::t_c16958c023777c 651-686,690-697
+  s_3a2fabc36d89e9::t_a7183f474990bb 687-689
+packages/blume/test/generate.test.ts
+  s_3a2fabc36d89e9::t_8519df7c1691ca 196-200,205-221
+  s_3a2fabc36d89e9::t_a756ef4a52ffbd 201-204
+apps/docs/content/docs/content/navigation.mdx
+  s_3a2fabc36d89e9::t_c16958c023777c 112,116-121
+  s_3a2fabc36d89e9::t_334bac319c9c24 113-115,122-124
+.changeset/fresh-rivers-rest.md
+  s_3a2fabc36d89e9::t_334bac319c9c24 1-4
+  s_3a2fabc36d89e9::t_c16958c023777c 5
+packages/blume/test/core.test.ts
+  s_3a2fabc36d89e9::t_a756ef4a52ffbd 959-979
+  s_3a2fabc36d89e9::t_8519df7c1691ca 980-981
+packages/blume/src/core/config-input.ts
+  s_3a2fabc36d89e9::t_c16958c023777c 301-310,385-386
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "710e14e605ad5a51fd559adc4ff5c39a35bfe3fd",
+  "prompts": {},
+  "sessions": {
+    "s_3a2fabc36d89e9": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_09e3f59deffeP3S3gF45h545iQ",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "jaydenfyi <213395523+jaydenfyi@users.noreply.github.com>"
+    }
+  }
+}
