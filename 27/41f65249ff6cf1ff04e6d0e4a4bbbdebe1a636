@@ -1,0 +1,19 @@
+apps/docs/blume.config.ts
+  s_e414628aa31879::t_5c0081de1fc505 4-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2741f65249ff6cf1ff04e6d0e4a4bbbdebe1a636",
+  "prompts": {},
+  "sessions": {
+    "s_e414628aa31879": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_09e48ccf0ffeMSr21FRCts8A5c",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "jaydenfyi <213395523+jaydenfyi@users.noreply.github.com>"
+    }
+  }
+}
